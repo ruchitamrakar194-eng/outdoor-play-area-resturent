@@ -33,7 +33,7 @@ const corsOptions = {
 
 // 🔥 MUST BE FIRST
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, '../uploads');
