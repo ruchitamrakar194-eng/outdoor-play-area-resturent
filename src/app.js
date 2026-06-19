@@ -20,35 +20,27 @@ const corsOptions = {
       process.env.FRONTEND_URL
     ].filter(Boolean);
 
-    // ✅ IMPORTANT FIX
     if (!origin) return callback(null, true);
 
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
 
-    console.log("Blocked by CORS:", origin);
-    return callback(null, false); // ❌ DO NOT THROW ERROR
+    return callback(null, true); // IMPORTANT: DO NOT block
   },
   credentials: true,
   methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
   allowedHeaders: ['Content-Type','Authorization']
 };
 
-// 🔥 MUST BE FIRST
+// ONLY THIS
 app.use(cors(corsOptions));
 
-// ✅ IMPORTANT: handle preflight safely
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin);
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
 
+app.use((req, res, next) => {
   if (req.method === 'OPTIONS') {
     return res.sendStatus(204);
   }
-
   next();
 });
 
