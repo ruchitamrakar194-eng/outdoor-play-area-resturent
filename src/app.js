@@ -20,11 +20,15 @@ const corsOptions = {
       process.env.FRONTEND_URL
     ].filter(Boolean);
 
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS: ' + origin));
+    // ✅ IMPORTANT FIX
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
     }
+
+    console.log("Blocked by CORS:", origin);
+    return callback(null, false); // ❌ DO NOT THROW ERROR
   },
   credentials: true,
   methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
@@ -33,7 +37,20 @@ const corsOptions = {
 
 // 🔥 MUST BE FIRST
 app.use(cors(corsOptions));
-app.options(/.*/, cors(corsOptions));
+
+// ✅ IMPORTANT: handle preflight safely
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin);
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+
+  next();
+});
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, '../uploads');
