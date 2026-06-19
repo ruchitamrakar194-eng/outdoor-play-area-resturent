@@ -10,39 +10,13 @@ require('dotenv').config();
 const app = express();
 const fs = require('fs');
 
-const corsOptions = {
-  origin: function (origin, callback) {
-    const allowedOrigins = [
-      'http://localhost:5173',
-      'http://localhost:3000',
-      'http://127.0.0.1:5173',
-      'https://outdoor_play_arena.netlify.app',
-      process.env.FRONTEND_URL
-    ].filter(Boolean);
-
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-
-    return callback(null, true); // IMPORTANT: DO NOT block
-  },
+app.use(cors({
+  origin: true,
   credentials: true,
-  methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
-  allowedHeaders: ['Content-Type','Authorization']
-};
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
-// ONLY THIS
-app.use(cors(corsOptions));
-
-
-app.use((req, res, next) => {
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(204);
-  }
-  next();
-});
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, '../uploads');
